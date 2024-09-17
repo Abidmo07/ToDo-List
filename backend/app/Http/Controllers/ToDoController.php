@@ -22,6 +22,7 @@ class ToDoController extends Controller
     {
       $data=$request->validate([
             'task'=>'required|string|max:255',
+            'completed'=>'boolean'
         ]);
     $task= Todo::create($data);
         return response()->json([
@@ -47,7 +48,8 @@ class ToDoController extends Controller
     public function update(Request $request, ToDo $task)
     {
              $data=$request->validate([
-            'task'=>'required|string|max:255',
+            'task'=>'string|max:255',
+            'completed'=>'boolean'
         ]);
        $task->update($data);
        return response()->json([
