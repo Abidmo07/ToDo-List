@@ -1,25 +1,21 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
-
-
+import { TodoContext } from "../TodoContext";
 export default function Home() {
-  const [task, setTask] = useState('');
-  const [todos, setTodos] = useState([]);
-  const[check,setCheck]=useState(0);
+  const [task, setTask] = useState("");
 
-  const handleCheckbox=(e)=>{
-    setCheck(e.target.checked);
-  }
+  const { toggleCompleted, todos, setTodos } = useContext(TodoContext);
 
   const handleCreate = (e) => {
     e.preventDefault();
     const taskData = { task };
 
-    axios.post('http://127.0.0.1:8000/api/task', taskData)
+    axios
+      .post("http://127.0.0.1:8000/api/task", taskData)
       .then((response) => {
         console.log(response.data);
         fetchTasks(); // Refresh the list of tasks
-        setTask(''); // Clear the input field
+        setTask(""); // Clear the input field
       })
       .catch((error) => {
         console.error("Error creating task:", error);
@@ -27,7 +23,8 @@ export default function Home() {
   };
 
   const fetchTasks = () => {
-    axios.get('http://127.0.0.1:8000/api/task')
+    axios
+      .get("http://127.0.0.1:8000/api/task")
       .then((response) => {
         console.log(response.data);
         setTodos(response.data); // Set tasks from the response
@@ -42,7 +39,8 @@ export default function Home() {
   }, []);
 
   const deleteTask = (taskId) => {
-    axios.delete(`http://127.0.0.1:8000/api/task/${taskId}`)
+    axios
+      .delete(`http://127.0.0.1:8000/api/task/${taskId}`)
       .then(() => {
         fetchTasks(); // Refresh the list of tasks
         console.log("Task deleted successfully");
@@ -58,7 +56,10 @@ export default function Home() {
         <h1 className="mb-10 text-3xl font-semibold text-center text-black">
           Todo App
         </h1>
-        <form onSubmit={handleCreate} className="flex justify-center gap-1 mx-10 mb-6">
+        <form
+          onSubmit={handleCreate}
+          className="flex justify-center gap-1 mx-10 mb-6"
+        >
           <input
             type="text"
             placeholder="What do we have today?"
@@ -66,7 +67,11 @@ export default function Home() {
             onChange={(e) => setTask(e.target.value)}
             value={task}
           />
-          <button type="submit" className="btn btn-square btn-outline" aria-label="Add Task">
+          <button
+            type="submit"
+            className="btn btn-square btn-outline hover:bg-green-600"
+            aria-label="Add Task"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-6 h-6"
@@ -83,24 +88,27 @@ export default function Home() {
             </svg>
           </button>
         </form>
-       
+
         {todos.map((todo) => (
-          <div key={todo.id} className="flex justify-between p-3 mx-10 mb-3 rounded-md bg-slate-200">
-            <div className="flex items-center gap-2">
-              <input checked={check} onChange={handleCheckbox}     type="checkbox" className={`border border-black checkbox ${todo.completed? 'line-through':''} `}
- onClick={()=>{
-  
-                axios.get('http://127.0.0.1:8000/api/task/complete/'+todo.id).then((response)=>{
-                  console.log(response.data.completed)
-                  setCheck(response.data.completed);
-                  
-                  
-                })              }} />
-                       <p className={`text-black ${check ? 'line-through' : ''}`}>{todo.task}</p>
+          <div
+            key={todo.id}
+            className="flex justify-between p-3 mx-10 mb-3 rounded-md bg-slate-200"
+          >
+            <div
+              className={`flex items-center gap-2 ${
+                todo.completed ? "line-through text-red-700 " : ""
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleCompleted(todo.id)}
+                className="mr-3"
+              />
+             <p className="font-medium text-gray-900 ">{todo.task}</p> 
             </div>
-            
+
             <span className="flex gap-4">
-           
               <button
                 onClick={() => deleteTask(todo.id)}
                 type="button"
